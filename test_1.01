@@ -1,0 +1,223 @@
+
+
+#include <IRremote.h>
+
+
+int Chan1 = 11;
+int Chan2 = 9;
+//int Chan3 = 3;
+int LED1 = 6;
+int LED2 = 5;
+//int LED3 = 10;
+int RECV_PIN = 2;
+
+int buttonPin1 = 12;
+int buttonPin2 = 8;
+int buttonPin3 = 4;
+int reading1,reading2,reading3;
+int state1,state2,state3;
+int previous1,previous2,previous3;
+int rot,rot1,rot2;
+boolean button1;
+boolean button2;
+//boolean button3;
+
+int i;
+int brightPrev1;
+int brightPrev2;
+int brightness;
+int brightness1;
+int brightness2;
+
+int fadeAmount = 10;    // how many points to fade the LED by
+unsigned long currentTime;
+unsigned long loopTime;
+//const int pin_A = 12;  // pin 12
+//const int pin_B = 11;  // pin 11
+unsigned char encoder_A;
+unsigned char encoder_B;
+unsigned char encoder_A_prev=0;
+//int state(
+
+
+IRrecv irrecv(RECV_PIN);
+decode_results results;
+
+boolean buttonState1(int brightness );
+boolean buttonState2(int brightness );
+
+
+void setup() {
+  
+  pinMode(Chan1,OUTPUT);
+  pinMode(Chan2,OUTPUT);
+  
+  pinMode(LED1,OUTPUT);
+  pinMode(buttonPin1,INPUT);
+  pinMode(LED2,OUTPUT);
+  pinMode(buttonPin2,INPUT);
+
+  
+  irrecv.enableIRIn();
+  
+  digitalWrite(buttonPin1,HIGH);
+  digitalWrite(buttonPin2,HIGH);
+
+  Serial.begin(9600);
+  state1 = HIGH;
+  state2 = HIGH;
+  brightness1 = 0;
+  brightness2 = 0;
+  brightness = 0;
+  i = 1;
+}
+void loop(){
+  
+
+
+  button1 = buttonState1();
+  button2 = buttonState2();
+  if(button1 == 1 && button2 == 0){
+    brightnessEncode1();
+    analogWrite(LED1,brightness1);
+    
+    
+  }
+  if(button2 == 1 && button1 == 0){
+    brightnessEncode2();
+    analogWrite(LED2,brightness2);
+    
+  }
+
+
+  
+  Serial.print("Channel 1: ");
+  Serial.print(button1);
+  Serial.print("     ");
+
+  
+  Serial.print("brightness1: ");
+  Serial.print(brightness1); 
+  Serial.print("     ");
+  
+  Serial.print("Channel 2: ");
+  Serial.print(button2);
+  Serial.print("     ");
+
+  Serial.print("brightness2: ");
+  Serial.println(brightness2);
+
+  Serial.print("State =");
+  Serial.println(state1);
+
+
+}
+
+boolean buttonState1(){
+//Button State 1
+
+  reading1 = digitalRead(buttonPin1);
+  //Serial.println(reading1);
+  if(reading1 == 0 && previous1 == 1){
+    if(state1 == LOW)
+      state1 = HIGH;
+    else 
+      state1 = LOW;
+  }
+
+  digitalWrite(Chan1,state1);
+  //analogWrite(LED1,brightPrev1);
+  //analogWrite(LED1,brightness1);
+  //digitalWrite(LED2,state2);
+  delay(50);
+
+  
+  previous1 = reading1;
+  
+  return state1;
+  
+}
+
+boolean buttonState2(){
+  
+  reading2 = digitalRead(buttonPin2);
+  //Serial.println(reading2);
+  if(reading2 == 0 && previous2 == 1){
+    if(state2 == LOW)
+      state2 = HIGH;
+    else 
+      state2 = LOW;
+  }
+  digitalWrite(Chan2,state2);
+  //analogWrite(LED2,brightPrev2);
+  //analogWrite(LED2,brightness2);
+  previous2 = reading2;
+  return state2;
+}
+
+int brightnessEncode1(){
+    
+    currentTime = millis();
+
+    if(currentTime >= (loopTime + 5)){
+      // 5ms since last check of encoder = 200Hz  
+      encoder_A = analogRead(3);    // Read encoder pins
+      encoder_B = analogRead(4);   
+      if((!encoder_A) && (encoder_A_prev)){
+        // A has gone from high to low 
+        if(encoder_B) {
+          // B is high so clockwise
+          // increase the brightness, dont go over 255
+          if(brightness1 + fadeAmount <= 255) brightness1 += fadeAmount;               
+        }   
+        else {
+          // B is low so counter-clockwise      
+          // decrease the brightness, dont go below 0
+          if(brightness1 - fadeAmount >= 0) brightness1 -= fadeAmount;               
+        }   
+  
+      }   
+      encoder_A_prev = encoder_A;     // Store value of A for next time    
+      //Serial.println(brightness);
+      // set the brightness of pin 9:
+
+      //analogWrite(LED2,brightness); 
+      //Serial.println(brightness);
+      loopTime = currentTime;  // Updates loopTime
+    }
+    //if(button2 == 1){brightness2 = brightness1;}
+
+
+}
+int brightnessEncode2(){
+    
+    currentTime = millis();
+
+    if(currentTime >= (loopTime + 5)){
+      // 5ms since last check of encoder = 200Hz  
+      encoder_A = analogRead(3);    // Read encoder pins
+      encoder_B = analogRead(4);   
+      if((!encoder_A) && (encoder_A_prev)){
+        // A has gone from high to low 
+        if(encoder_B) {
+          // B is high so clockwise
+          // increase the brightness, dont go over 255
+          if(brightness2 + fadeAmount <= 255) brightness2 += fadeAmount;               
+        }   
+        else {
+          // B is low so counter-clockwise      
+          // decrease the brightness, dont go below 0
+          if(brightness2 - fadeAmount >= 0) brightness2 -= fadeAmount;               
+        }   
+  
+      }   
+      encoder_A_prev = encoder_A;     // Store value of A for next time    
+      //Serial.println(brightness);
+      // set the brightness of pin 9:
+
+      //analogWrite(LED2,brightness); 
+      //Serial.println(brightness);
+      loopTime = currentTime;  // Updates loopTime
+    }
+    
+}
