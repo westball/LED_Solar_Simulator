@@ -1,0 +1,19 @@
+int pT = 2;    //potentiometer pin
+int led = 9;    //LED pin
+int brightness; //value for brightness
+
+void setup(){
+  pinMode(led,OUTPUT);
+  Serial.begin(9600);
+  
+}
+void loop(){
+
+  brightness = analogRead(pT);
+  brightness = map(brightness,0,1023,0,254);
+  
+  analogWrite(led,brightness); //Writes PWM output to pin 9
+  
+  Serial.println(brightness);  //Print brightness value 0-254
+
+}
